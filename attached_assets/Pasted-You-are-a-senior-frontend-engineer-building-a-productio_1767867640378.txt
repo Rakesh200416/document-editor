@@ -1,0 +1,104 @@
+You are a senior frontend engineer building a production-ready rich text editor.
+
+TASK:
+Build a FRONTEND-ONLY document editor with real-time pagination using Tiptap, similar to Microsoft Word / Google Docs page layout.
+
+IMPORTANT CONSTRAINTS:
+- Backend is NOT required
+- Focus ONLY on frontend logic and UI
+- Code must be clean, readable, and production-ready
+- Follow all mandatory requirements listed below
+- Assume this is a take-home assignment for a product company
+
+TECH STACK (MANDATORY):
+- Next.js (App Router preferred)
+- React
+- TypeScript
+- Tailwind CSS
+- Tiptap editor (@tiptap/react)
+
+EDITOR REQUIREMENTS (MANDATORY):
+Implement a rich text editor with toolbar tools similar to MS Word, including:
+- Paragraph text
+- Headings (H1, H2, H3)
+- Bold
+- Italic
+- Underline
+- Strike-through
+- Bullet list
+- Numbered list
+- Text alignment (left, center, right, justify)
+- Undo / Redo
+- Clear formatting
+- Proper spacing and line-height handling
+
+PAGINATION REQUIREMENTS (CORE TASK):
+- Display visual page boundaries inside the editor
+- Pages must look like real paper pages (white background, subtle shadow)
+- Pages must update dynamically as the user types, deletes, or pastes content
+- Page breaks must move automatically
+- Pages must be stacked vertically like MS Word / Google Docs
+
+PRINT ACCURACY (MANDATORY):
+- Page size: US Letter (8.5 x 11 inches)
+- Margins: 1 inch on all sides
+- Convert inches to pixels correctly (assume 96 DPI)
+- What the user sees in the editor must match printed output exactly
+
+PAGINATION LOGIC REQUIREMENTS:
+- Measure rendered DOM content height dynamically
+- Calculate how much content fits per page
+- Insert visual page breaks when content exceeds page height
+- Recalculate pagination on every editor update
+- Handle:
+  - Mixed content (headings + paragraphs + lists)
+  - Different font sizes and line heights
+  - Editing content in the middle of the document
+  - Long paragraphs that span multiple pages (gracefully)
+
+DESIGN & UX REQUIREMENTS:
+- Each page should look like a real document page
+- Clear visual separation between pages
+- Smooth scrolling
+- Clean, minimal UI
+- Toolbar fixed at top (Word-like experience)
+
+PDF & PRINT FEATURES (FRONTEND-ONLY):
+- Add "Print" and "Export to PDF" options in the toolbar
+- Ensure exported PDF matches editor layout exactly
+- Use client-side libraries only (e.g., html2pdf.js, jsPDF, or browser print)
+- Maintain US Letter size and margins in PDF output
+- No backend or server-side rendering allowed
+
+CODE QUALITY REQUIREMENTS:
+- Use reusable React components
+- Use proper hooks (useEffect, useRef, useCallback)
+- Avoid unnecessary re-renders
+- Comment complex logic (especially pagination and measurement)
+- Use Tailwind CSS for styling (no inline CSS)
+
+DELIVERABLES EXPECTED IN CODE:
+- Next.js project structure
+- Tiptap editor setup with required extensions
+- Pagination calculation logic
+- Page container component
+- Toolbar component (with editor + print + PDF controls)
+- Print-specific CSS (if required)
+- Clear separation of concerns
+
+DOCUMENTATION (IMPORTANT):
+Include a README.md that explains:
+1. How pagination is calculated using DOM measurements
+2. How page size and margins are handled
+3. How print and PDF export maintain layout accuracy
+4. Trade-offs and limitations
+5. What could be improved with more time
+
+OUTPUT FORMAT:
+- Provide full frontend code
+- Provide explanations only where necessary
+- No backend code
+- No placeholders like "implement later"
+
+GOAL:
+The final result should feel like a simplified Microsoft Word editor running in the browser, with real-time pagination and accurate print/PDF output.
