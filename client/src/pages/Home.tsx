@@ -1,158 +1,154 @@
-import { useDocuments, useDeleteDocument } from "@/hooks/use-documents";
-import { CreateDocumentDialog } from "@/components/CreateDocumentDialog";
-import { Link } from "wouter";
-import { 
-  FileText, Calendar, MoreVertical, Trash2, 
-  ExternalLink, Search
-} from "lucide-react";
+import { useDocuments, useCreateDocument, useDeleteDocument } from "@/hooks/use-documents";
+import { Link, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, FileText, Trash2, MoreVertical, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useState } from "react";
 
 export default function Home() {
   const { data: documents, isLoading } = useDocuments();
-  const deleteDocument = useDeleteDocument();
-  const [search, setSearch] = useState("");
+  const createMutation = useCreateDocument();
+  const deleteMutation = useDeleteDocument();
+  const [, setLocation] = useLocation();
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  const filteredDocs = documents?.filter(doc => 
-    doc.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleCreate = async () => {
+    const newDoc = await createMutation.mutateAsync({
+      title: "Untitled Document",
+      content: {},
+      headerContent: "",
+      footerContent: "",
+      showPageNumbers: true,
+    });
+    setLocation(`/document/${newDoc.id}`);
+  };
+
+  const handleDelete = async () => {
+    if (deleteId) {
+      await deleteMutation.mutateAsync(deleteId);
+      setDeleteId(null);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="bg-background border-b border-border/50 sticky top-0 z-10 backdrop-blur-xl bg-background/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/10 p-2.5 rounded-xl">
-              <FileText className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-                Lumina Editor
-              </h1>
-              <p className="text-xs text-muted-foreground">Premium Document Processor</p>
-            </div>
+    <div className="min-h-screen bg-slate-50/50">
+      <header className="bg-white border-b border-border px-8 py-4 flex items-center justify-between sticky top-0 z-10">
+        <div className="flex items-center gap-3">
+          <div className="bg-primary/10 p-2 rounded-lg">
+            <FileText className="w-6 h-6 text-primary" />
           </div>
-          <CreateDocumentDialog />
+          <h1 className="text-xl font-bold tracking-tight text-foreground font-display">
+            DocuFlow
+          </h1>
         </div>
+        <Button onClick={handleCreate} disabled={createMutation.isPending} className="shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all">
+          {createMutation.isPending ? "Creating..." : (
+            <>
+              <Plus className="w-4 h-4 mr-2" />
+              New Document
+            </>
+          )}
+        </Button>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        
-        {/* Actions Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-10">
-          <div className="relative w-full sm:w-96 group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input 
-              placeholder="Search documents..." 
-              className="pl-10 h-12 rounded-xl bg-background shadow-sm border-border/50 hover:border-primary/50 focus:border-primary transition-all"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+      <main className="max-w-7xl mx-auto px-8 py-12">
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             {[1,2,3].map(i => (
+               <div key={i} className="h-48 bg-slate-100 rounded-xl animate-pulse" />
+             ))}
           </div>
-          <div className="text-sm text-muted-foreground">
-            {filteredDocs?.length || 0} Documents
-          </div>
-        </div>
-
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {isLoading ? (
-            Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-card rounded-2xl p-6 border border-border/50 shadow-sm space-y-4">
-                <Skeleton className="h-4 w-1/3 rounded-lg" />
-                <Skeleton className="h-32 w-full rounded-xl" />
-                <div className="flex justify-between items-center pt-2">
-                  <Skeleton className="h-3 w-1/4 rounded-lg" />
-                  <Skeleton className="h-8 w-8 rounded-full" />
-                </div>
-              </div>
-            ))
-          ) : filteredDocs && filteredDocs.length > 0 ? (
-            filteredDocs.map((doc) => (
-              <div 
-                key={doc.id} 
-                className="group relative bg-card hover:bg-card/50 rounded-2xl border border-border/50 hover:border-primary/30 shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 flex flex-col"
-              >
-                {/* Card Preview Area */}
-                <Link href={`/document/${doc.id}`} className="block flex-1 p-6 cursor-pointer">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="bg-primary/5 p-3 rounded-xl group-hover:bg-primary/10 transition-colors">
-                      <FileText className="h-6 w-6 text-primary" />
-                    </div>
-                    {/* Date Badge */}
-                    <div className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground flex items-center gap-1.5">
-                      <Calendar className="h-3 w-3" />
-                      {formatDistanceToNow(new Date(doc.updatedAt || doc.createdAt!), { addSuffix: true })}
-                    </div>
-                  </div>
-                  
-                  <h3 className="text-lg font-bold text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-                    {doc.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-                    {/* Attempt to extract text content from JSON or show placeholder */}
-                    {(doc.content as any)?.content?.[0]?.content?.[0]?.text || "No preview available..."}
-                  </p>
-                </Link>
-
-                {/* Card Actions Footer */}
-                <div className="px-6 py-4 border-t border-border/50 flex justify-between items-center bg-muted/20 rounded-b-2xl">
-                  <Link href={`/document/${doc.id}`} className="text-sm font-medium text-primary flex items-center gap-1 hover:underline">
-                    Open <ExternalLink className="h-3 w-3" />
-                  </Link>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-background/80">
-                        <MoreVertical className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 rounded-xl">
-                      <DropdownMenuItem asChild>
-                         <Link href={`/document/${doc.id}`} className="cursor-pointer">Edit Document</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
-                        onClick={() => {
-                          if (confirm("Are you sure you want to delete this document?")) {
-                            deleteDocument.mutate(doc.id);
-                          }
-                        }}
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" /> Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
-              <div className="bg-muted p-6 rounded-full mb-6">
-                <FileText className="h-12 w-12 text-muted-foreground" />
-              </div>
-              <h3 className="text-2xl font-bold text-foreground mb-2">No documents yet</h3>
-              <p className="text-muted-foreground max-w-md mx-auto mb-8">
-                Create your first document to get started with the Lumina Editor experience.
-              </p>
-              <CreateDocumentDialog />
+        ) : documents?.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
+            <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-8 h-8 text-slate-400" />
             </div>
-          )}
-        </div>
+            <h3 className="text-lg font-semibold text-slate-900">No documents yet</h3>
+            <p className="text-slate-500 mt-2 mb-6 max-w-sm mx-auto">Create your first document to start writing. It will be beautiful.</p>
+            <Button onClick={handleCreate} variant="outline">Create Document</Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {documents?.map((doc) => (
+              <Card key={doc.id} className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-border/60 bg-white/80 backdrop-blur-sm">
+                <CardHeader className="pb-3">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="line-clamp-1 text-lg font-medium group-hover:text-primary transition-colors">
+                      <Link href={`/document/${doc.id}`}>{doc.title}</Link>
+                    </CardTitle>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteId(doc.id)}>
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <CardDescription className="flex items-center text-xs mt-1">
+                    <Clock className="w-3 h-3 mr-1" />
+                    {doc.updatedAt && formatDistanceToNow(new Date(doc.updatedAt), { addSuffix: true })}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link href={`/document/${doc.id}`}>
+                    <div className="h-32 bg-slate-50 rounded-md border border-slate-100 p-4 overflow-hidden relative group-hover:bg-white transition-colors">
+                      <div className="w-full h-full text-[6px] text-slate-300 leading-relaxed select-none">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam...
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-50 group-hover:from-white to-transparent h-10 top-auto bottom-0" />
+                    </div>
+                  </Link>
+                </CardContent>
+                <CardFooter className="pt-0">
+                  <Button variant="secondary" className="w-full opacity-0 group-hover:opacity-100 transition-all duration-300" asChild>
+                    <Link href={`/document/${doc.id}`}>Open Editor</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
       </main>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your document.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

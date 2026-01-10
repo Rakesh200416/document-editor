@@ -1,129 +1,86 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@300;400;700&family=JetBrains+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Roboto+Mono:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: 210 20% 98%;
-  --foreground: 222 47% 11%;
-  
-  --primary: 221 83% 53%;
-  --primary-foreground: 210 40% 98%;
-  
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
-  
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-  
-  --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
-  
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
-
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 221 83% 53%;
-
-  --radius: 0.5rem;
-}
-
 @layer base {
-  * {
-    @apply border-border;
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+    --radius: 0.5rem;
   }
+
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased font-sans;
   }
 }
 
-@layer utilities {
-  .font-serif {
-    font-family: 'Merriweather', serif;
-  }
-}
-
-/* Tiptap Editor Styles */
+/* Editor Styles */
 .ProseMirror {
-  outline: none;
-  min-height: 100%;
-  padding: 96px; /* 1 inch padding matching visual page */
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-.ProseMirror p.is-editor-empty:first-child::before {
-  color: #adb5bd;
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
-}
-
-.ProseMirror h1 {
-  @apply text-4xl font-bold mb-4 mt-6 text-foreground leading-tight;
-}
-
-.ProseMirror h2 {
-  @apply text-2xl font-bold mb-3 mt-5 text-foreground leading-snug;
-}
-
-.ProseMirror h3 {
-  @apply text-xl font-bold mb-2 mt-4 text-foreground;
-}
-
-.ProseMirror ul {
-  @apply list-disc ml-4 mb-4;
-}
-
-.ProseMirror ol {
-  @apply list-decimal ml-4 mb-4;
-}
-
-.ProseMirror blockquote {
-  @apply border-l-4 border-primary/50 pl-4 italic text-muted-foreground my-4;
+  @apply outline-none min-h-[1056px];
 }
 
 /* Print Styles */
 @media print {
   @page {
+    size: letter;
     margin: 0;
-    size: auto;
-  }
-  
-  body {
-    background: white;
   }
 
-  .no-print {
+  body {
+    background: white;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Hide UI elements */
+  nav, header, button, .toolbar-container, .no-print {
     display: none !important;
   }
 
-  .print-container {
-    padding: 0 !important;
-    background: white !important;
+  /* Reset Page Containers for Print */
+  .page-container {
     box-shadow: none !important;
-    transform: none !important;
     margin: 0 !important;
-  }
-
-  /* Force page breaks on the visual page divs */
-  .page-break-after {
-    break-after: page;
     page-break-after: always;
+    border: none !important;
+    overflow: hidden;
+  }
+  
+  .editor-canvas {
+    transform: none !important;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
   }
 }
 
-/* Custom Scrollbar for editor feeling */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30 transition-colors;
+  @apply bg-border rounded-full hover:bg-muted-foreground/50;
 }
