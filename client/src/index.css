@@ -1,117 +1,89 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@300;400;700&family=JetBrains+Mono&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-sans: 'Inter', sans-serif;
-  --font-serif: 'Merriweather', serif;
-  --font-mono: 'JetBrains Mono', monospace;
-
-  /* Refined Blue/Slate Palette */
-  --background: 210 20% 98%;    /* #f3f5f8 - Light gray-blue bg */
-  --foreground: 222 47% 11%;    /* #0f172a - Slate 900 */
+  --background: 210 20% 98%;
+  --foreground: 222 47% 11%;
   
-  --primary: 221 83% 53%;       /* #3b82f6 - Blue 500 */
+  --primary: 221 83% 53%;
   --primary-foreground: 210 40% 98%;
-
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-
-  --destructive: 0 84.2% 60.2%;
+  
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+  
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 11%;
+  
+  --destructive: 0 84% 60%;
   --destructive-foreground: 210 40% 98%;
 
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
-  
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 221 83% 53%;
+
   --radius: 0.5rem;
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
-    font-family: var(--font-sans);
+    @apply bg-background text-foreground font-sans antialiased;
   }
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30 transition-colors;
+@layer utilities {
+  .font-serif {
+    font-family: 'Merriweather', serif;
+  }
 }
 
 /* Tiptap Editor Styles */
 .ProseMirror {
-  @apply outline-none min-h-[900px] text-lg leading-relaxed font-serif text-slate-800;
-  counter-reset: heading;
+  outline: none;
+  min-height: 100%;
+  padding: 96px; /* 1 inch padding matching visual page */
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
-.ProseMirror p {
-  @apply mb-4;
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
 }
 
 .ProseMirror h1 {
-  @apply text-4xl font-sans font-bold mb-4 mt-8 text-slate-900 tracking-tight;
+  @apply text-4xl font-bold mb-4 mt-6 text-foreground leading-tight;
 }
 
 .ProseMirror h2 {
-  @apply text-2xl font-sans font-bold mb-4 mt-6 text-slate-900 tracking-tight border-b pb-2 border-slate-200;
+  @apply text-2xl font-bold mb-3 mt-5 text-foreground leading-snug;
 }
 
 .ProseMirror h3 {
-  @apply text-xl font-sans font-semibold mb-3 mt-4 text-slate-800;
+  @apply text-xl font-bold mb-2 mt-4 text-foreground;
 }
 
 .ProseMirror ul {
-  @apply list-disc list-outside ml-6 mb-4;
+  @apply list-disc ml-4 mb-4;
 }
 
 .ProseMirror ol {
-  @apply list-decimal list-outside ml-6 mb-4;
+  @apply list-decimal ml-4 mb-4;
 }
 
 .ProseMirror blockquote {
-  @apply border-l-4 border-primary/50 pl-4 italic text-slate-600 my-4 bg-slate-50 py-2 pr-2 rounded-r;
-}
-
-.ProseMirror hr {
-  @apply my-8 border-slate-200;
-}
-
-/* Placeholder extension style */
-.ProseMirror p.is-editor-empty:first-child::before {
-  content: attr(data-placeholder);
-  @apply text-slate-400 float-left pointer-events-none h-0;
-}
-
-/* Page Break Visualization (Simulated) */
-.page-break-marker {
-  @apply absolute left-0 w-full h-px bg-slate-300 pointer-events-none flex items-center justify-center;
-  /* Visual gap */
-  box-shadow: 0 4px 8px -2px rgba(0,0,0,0.1) inset, 0 -4px 8px -2px rgba(0,0,0,0.1) inset;
-  background-color: #f1f5f9; /* Slate 100 */
-  height: 20px; 
-}
-.page-break-marker::after {
-  content: "Page Break";
-  @apply text-[10px] uppercase font-bold text-slate-400 tracking-widest bg-slate-100 px-2 rounded border border-slate-200;
+  @apply border-l-4 border-primary/50 pl-4 italic text-muted-foreground my-4;
 }
 
 /* Print Styles */
@@ -120,33 +92,38 @@
     margin: 0;
     size: auto;
   }
-
+  
   body {
     background: white;
   }
 
-  /* Hide UI elements */
-  nav, header, button, .toolbar, .no-print {
+  .no-print {
     display: none !important;
   }
 
-  /* Reset container styles for print */
-  .page-container {
+  .print-container {
+    padding: 0 !important;
+    background: white !important;
     box-shadow: none !important;
+    transform: none !important;
     margin: 0 !important;
-    padding: 1in !important; /* Force US Letter margins */
-    width: 100% !important;
-    max-width: none !important;
-    height: auto !important;
-    overflow: visible !important;
   }
 
-  .ProseMirror {
-    min-height: auto !important;
+  /* Force page breaks on the visual page divs */
+  .page-break-after {
+    break-after: page;
+    page-break-after: always;
   }
+}
 
-  /* Hide visual page breaks in print since physical paper handles it */
-  .page-break-marker {
-    display: none !important;
-  }
+/* Custom Scrollbar for editor feeling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30 transition-colors;
 }

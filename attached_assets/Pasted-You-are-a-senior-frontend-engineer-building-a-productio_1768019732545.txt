@@ -1,0 +1,120 @@
+You are a senior frontend engineer building a production-ready rich text editor.
+
+TASK:
+Build a FRONTEND-ONLY Tiptap-based document editor with real-time pagination, similar to Microsoft Word / Google Docs, ensuring the editor view, print output, and PDF export are perfectly aligned.
+
+IMPORTANT CONSTRAINTS:
+- Backend is NOT required
+- Focus ONLY on frontend logic and UI
+- Code must be clean, readable, and production-ready
+- Treat this as a real take-home assignment for a product company
+- Do NOT use placeholder implementations
+
+TECH STACK (MANDATORY):
+- Next.js (App Router preferred)
+- React
+- TypeScript
+- Tailwind CSS
+- Tiptap editor (@tiptap/react)
+
+EDITOR FEATURES (MANDATORY):
+Implement a Word-like toolbar supporting:
+- Paragraph text
+- Headings (H1, H2, H3)
+- Bold, Italic, Underline, Strike-through
+- Bullet lists and numbered lists
+- Text alignment (left, center, right, justify)
+- Font size selector
+- Font family selector
+- Text color and highlight
+- Link insertion
+- Undo / Redo
+- Clear formatting
+- Proper spacing and line-height handling
+
+CORE PAGINATION REQUIREMENTS (VERY IMPORTANT):
+- Pages must be visually visible INSIDE the editor while typing
+- Pages must look like real paper sheets (white background, subtle shadow)
+- Page breaks must update dynamically on:
+  - typing
+  - deleting
+  - pasting
+  - editing in the middle of the document
+- Pages must stack vertically like MS Word / Google Docs
+- Page breaks must NOT appear as editable text
+- Page boundaries must be layout elements only (non-editable)
+
+PRINT & LAYOUT ACCURACY (MANDATORY):
+- Page size: US Letter (8.5 x 11 inches)
+- Margins: exactly 1 inch on all sides
+- Assume 96 DPI for inch-to-pixel conversion
+- Editor layout must match print and PDF output exactly
+- What the user sees in the editor must be identical to what prints
+
+PAGINATION LOGIC REQUIREMENTS:
+- Measure rendered DOM content height dynamically
+- Calculate available content height per page
+- Automatically flow content across pages
+- Handle:
+  - Mixed content types (headings, paragraphs, lists)
+  - Different font sizes and line heights
+  - Long paragraphs spanning multiple pages
+  - Content reflow when editing mid-document
+- Pagination must recalculate on every editor update
+
+HEADER, FOOTER & PAGE NUMBERING (ADDED REQUIREMENT):
+- Add support for a fixed header and footer on every page
+- Header and footer must NOT be editable content
+- Footer must display dynamic page numbers (e.g., “Page 1 of 5”)
+- Header, footer, and page numbers must appear:
+  - In the editor view
+  - In print output
+  - In exported PDF
+
+PDF EXPORT & PRINT (FRONTEND-ONLY):
+- Add toolbar actions:
+  - Print
+  - Export to PDF
+- Use client-side only libraries (e.g., html2pdf.js or equivalent)
+- Ensure exported PDF:
+  - Uses US Letter size
+  - Has correct margins
+  - Preserves pagination, header, footer, and page numbers
+- PDF layout must exactly match the editor view
+- No backend or server-side rendering allowed
+
+DESIGN & UX REQUIREMENTS:
+- Minimalist, Google Docs–style UI
+- Neutral gray color scheme
+- Light mode only
+- Clean, distraction-free layout
+- Smooth scrolling between pages
+- Toolbar fixed at the top
+
+CODE QUALITY REQUIREMENTS:
+- Modular, reusable React components
+- Proper use of hooks (useEffect, useRef, useCallback)
+- Avoid unnecessary re-renders
+- Clear comments for complex logic (pagination, measurement)
+- Tailwind CSS only (no inline styles)
+
+DELIVERABLES EXPECTED IN CODE:
+- Next.js project structure
+- Tiptap editor configuration with required extensions
+- Page container component (fixed-size pages)
+- Header and footer components
+- Pagination calculation logic
+- Toolbar component with formatting + print/PDF actions
+- Print-specific CSS rules
+
+DOCUMENTATION (MANDATORY):
+Include a README.md explaining:
+1. How real-time pagination is calculated using DOM measurement
+2. How page size and margins are enforced
+3. How editor, print, and PDF outputs stay in sync
+4. Why page breaks are layout elements, not document content
+5. Trade-offs and known limitations
+6. What could be improved with more time
+
+GOAL:
+The final result should feel like a simplified Microsoft Word editor running in the browser, where users can see exact page boundaries while typing and export perfectly formatted legal documents as PDF.

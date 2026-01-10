@@ -1,30 +1,38 @@
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRoute } from "wouter";
+import { useDocument, useUpdateDocument } from "@/hooks/use-documents";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
+import Image from "@tiptap/extension-image";
 import Typography from "@tiptap/extension-typography";
-import { useDocument, useUpdateDocument } from "@/hooks/use-documents";
 import { Toolbar } from "@/components/Toolbar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { useDebounce } from "@/hooks/use-debounce";
+// @ts-ignore - html2pdf doesn't have good types
+import html2pdf from "html2pdf.js";
 
-// A4/Letter size constants
-const PAGE_HEIGHT_PX = 1056; // 11in @ 96dpi
-const PAGE_GAP_PX = 20;
+const PAGE_HEIGHT = 1056; // 11in * 96dpi
+const PAGE_WIDTH = 816;   // 8.5in * 96dpi
+const PAGE_GAP = 24;      // Space between pages
 
 export default function EditorPage() {
   const [, params] = useRoute("/document/:id");
-  const id = params?.id ? parseInt(params.id) : null;
+  const id = parseInt(params?.id || "0");
+  const { data: document, isLoading, error } = useDocument(id);
+  const updateDocument = useUpdateDocument();
+  const { toast } = useToast();
   
-  const { data: document, isLoading } = useDocument(id);
-  const { mutate: updateDocument } = useUpdateDocument();
-  const [content, setContent] = useState<any>(null);
-  const debouncedContent = useDebounce(content, 2000); // Auto-save every 2s
+  const [totalPages, setTotalPages] = useState(1);
+  const [isSaving, setIsSaving] = useState(false);
+  const editorRef = useRef<HTMLDivElement>(null);
 
-  // Editor initialization
+  // Debounce save function
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -34,109 +42,142 @@ export default function EditorPage() {
         types: ['heading', 'paragraph'],
       }),
       Placeholder.configure({
-        placeholder: 'Start writing...',
+        placeholder: "Start typing your masterpiece...",
       }),
+      Image,
     ],
+    content: document?.content || { type: 'doc', content: [] },
     editorProps: {
       attributes: {
-        class: 'prose prose-lg max-w-none focus:outline-none min-h-[900px]',
+        class: "focus:outline-none min-h-[1056px] w-[816px] px-[96px] py-[96px]",
       },
     },
     onUpdate: ({ editor }) => {
-      setContent(editor.getJSON());
+      // Calculate pages
+      if (editorRef.current) {
+        const height = editorRef.current.scrollHeight;
+        const pages = Math.max(1, Math.ceil(height / PAGE_HEIGHT));
+        setTotalPages(pages);
+      }
+
+      // Auto-save
+      setIsSaving(true);
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      
+      saveTimeoutRef.current = setTimeout(() => {
+        updateDocument.mutate(
+          { id, content: editor.getJSON() },
+          { onSuccess: () => setIsSaving(false) }
+        );
+      }, 1000);
     },
   });
 
-  // Load content when document is fetched
+  // Sync content when document loads
   useEffect(() => {
-    if (document && editor && !editor.getText()) {
-      // Only set content if editor is empty to prevent overwriting unsaved changes
-      if (document.content) {
-        editor.commands.setContent(document.content as any);
-      }
+    if (document && editor && !editor.isDestroyed && editor.isEmpty) {
+      editor.commands.setContent(document.content as any);
+      // Recalculate pages after content load
+      setTimeout(() => {
+         if (editorRef.current) {
+          const height = editorRef.current.scrollHeight;
+          const pages = Math.max(1, Math.ceil(height / PAGE_HEIGHT));
+          setTotalPages(pages);
+        }
+      }, 100);
     }
   }, [document, editor]);
 
-  // Auto-save effect
-  useEffect(() => {
-    if (debouncedContent && id) {
-      updateDocument({
-        id,
-        content: debouncedContent,
-        title: document?.title || 'Untitled', // Keep existing title
-      });
-    }
-  }, [debouncedContent, id]);
+  // Export PDF Handler
+  const handleExportPdf = useCallback(() => {
+    if (!editorRef.current) return;
+    
+    const element = editorRef.current;
+    const opt = {
+      margin: 0,
+      filename: `${document?.title || 'document'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
 
-  // Handle title update
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (id) {
-      updateDocument({
-        id,
-        title: e.target.value,
-      });
-    }
-  };
+    toast({ title: "Exporting PDF...", description: "Please wait while we generate your file." });
+    
+    // Temporarily remove transform/positioning to capture full height
+    const originalStyle = element.style.cssText;
+    
+    html2pdf().set(opt).from(element).save().then(() => {
+      toast({ title: "Success", description: "PDF downloaded successfully." });
+    });
+  }, [document]);
 
-  if (isLoading || !editor) {
+  const handlePrint = useCallback(() => {
+    window.print();
+  }, []);
+
+  if (isLoading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-slate-50">
+      <div className="h-screen w-full flex items-center justify-center bg-muted/30">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <Loader2 className="h-10 w-10 text-primary animate-spin" />
           <p className="text-muted-foreground font-medium">Loading Editor...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#F3F5F8] flex flex-col print:bg-white print:h-auto">
-      <Toolbar editor={editor} title={document?.title} />
-      
-      {/* Title Input - Only visible in UI, not print */}
-      <div className="w-full max-w-[816px] mx-auto mt-8 px-8 print:hidden">
-        <input
-          type="text"
-          value={document?.title || ''}
-          onChange={handleTitleChange}
-          placeholder="Document Title"
-          className="text-3xl font-bold bg-transparent border-none outline-none placeholder:text-slate-300 w-full"
-        />
+  if (error || !document) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-muted/30">
+        <div className="text-center max-w-md p-6 bg-card rounded-2xl shadow-lg border border-border">
+          <h2 className="text-xl font-bold text-destructive mb-2">Failed to load document</h2>
+          <p className="text-muted-foreground">The document you requested might have been deleted or doesn't exist.</p>
+        </div>
       </div>
+    );
+  }
 
-      <div className="flex-1 overflow-y-auto py-8 print:p-0 print:overflow-visible">
-        {/* Page Container */}
-        <div 
-          className="
-            relative mx-auto bg-white shadow-xl print:shadow-none
-            w-[816px] min-h-[1056px] 
-            px-[96px] py-[96px] 
-            transition-all duration-300
-            border border-slate-200/60 print:border-none
-          "
-          onClick={() => editor.chain().focus().run()}
-        >
-          {/* Simulated Page Breaks */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden print:hidden">
-            {/* 
-              This creates visual markers for page breaks.
-              Since content is in one editor, this is purely visual 
-              to guide the user on where pages end.
-             */}
-            {Array.from({ length: 10 }).map((_, i) => (
+  return (
+    <div className="min-h-screen bg-[#F3F4F6] flex flex-col font-sans">
+      <Toolbar 
+        editor={editor} 
+        onPrint={handlePrint} 
+        onExportPdf={handleExportPdf}
+        isSaving={isSaving}
+      />
+
+      {/* Editor Workspace */}
+      <div className="flex-1 overflow-auto relative py-12 px-4 print:p-0 print:overflow-visible">
+        <div className="relative mx-auto w-max print:w-full print:m-0">
+          
+          {/* Layer 1: Visual Pages Backgrounds */}
+          <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center pointer-events-none print:hidden" style={{ gap: `${PAGE_GAP}px` }}>
+            {Array.from({ length: totalPages }).map((_, i) => (
               <div 
                 key={i}
-                className="page-break-marker"
-                style={{ top: `${(i + 1) * PAGE_HEIGHT_PX}px` }}
-              />
+                className="bg-white shadow-lg border border-black/5 relative"
+                style={{ width: `${PAGE_WIDTH}px`, height: `${PAGE_HEIGHT}px` }}
+              >
+                {/* Header/Footer Placeholders */}
+                <div className="absolute bottom-8 w-full text-center text-[10px] text-muted-foreground/50 font-mono">
+                  Page {i + 1} of {totalPages}
+                </div>
+              </div>
             ))}
           </div>
 
-          <EditorContent editor={editor} />
-        </div>
-        
-        <div className="text-center mt-8 text-xs text-muted-foreground print:hidden pb-8">
-          Page 1 of 1 • WordSim Editor
+          {/* Layer 2: Tiptap Editor (Overlay) */}
+          <div className="relative z-10 print:static">
+             <div 
+              id="document-content" 
+              ref={editorRef}
+              className="mx-auto"
+              style={{ width: `${PAGE_WIDTH}px` }}
+             >
+                <EditorContent editor={editor} className="font-serif text-lg leading-relaxed text-gray-800" />
+             </div>
+          </div>
+
         </div>
       </div>
     </div>
