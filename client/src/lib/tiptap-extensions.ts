@@ -1,4 +1,4 @@
-import TextStyle from '@tiptap/extension-text-style';
+import { TextStyle } from '@tiptap/extension-text-style';
 import { Extension } from '@tiptap/core';
 
 declare module '@tiptap/core' {
