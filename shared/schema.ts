@@ -1,16 +1,16 @@
-import { pgTable, text, serial, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const documents = pgTable("documents", {
-  id: serial("id").primaryKey(),
+export const documents = sqliteTable("documents", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
-  content: jsonb("content"), // Stores Tiptap JSON content
+  content: blob("content", { mode: "json" }), // Stores Tiptap JSON content
   headerContent: text("header_content").default(""), // Stores header text
   footerContent: text("footer_content").default(""), // Stores footer text
-  showPageNumbers: boolean("show_page_numbers").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  showPageNumbers: integer("show_page_numbers", { mode: "boolean" }).default(true),
+  createdAt: integer("created_at", { mode: "timestamp" }).defaultNow(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).defaultNow(),
 });
 
 export const insertDocumentSchema = createInsertSchema(documents).omit({ 

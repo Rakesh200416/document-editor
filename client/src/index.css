@@ -60,16 +60,119 @@
   .page-container {
     box-shadow: none !important;
     margin: 0 !important;
+    page-break-inside: avoid;
     page-break-after: always;
-    border: none !important;
-    overflow: hidden;
+    border: 1px solid #ddd !important;
+    overflow: visible !important;
+    height: 1056px !important; /* Fixed height for print */
+    min-height: 1056px !important;
+    width: 816px !important;
+    position: relative !important;
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  .page-container:last-child {
+    page-break-after: avoid; /* Don't break after last page */
   }
   
   .editor-canvas {
     transform: none !important;
-    position: relative !important;
+    position: absolute !important;
+    top: 96px !important; /* Account for header */
+    left: 96px !important; /* Account for margins */
+    right: 96px !important;
+    bottom: 96px !important; /* Account for footer */
+    height: calc(1056px - 192px) !important; /* Account for header/footer */
+    min-height: calc(1056px - 192px) !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+  
+  /* Ensure content is properly sized for print */
+  #document-export-container {
+    width: 816px !important;
+    height: auto !important;
+  }
+  
+  /* Force all pages to show in print */
+  .page-container {
+    display: block !important;
+    visibility: visible !important;
+  }
+  
+  /* Make sure all content is visible */
+  .ProseMirror {
+    min-height: calc(1056px - 192px) !important;
+    overflow: visible !important;
+  }
+  
+  /* Ensure content visibility */
+  *, *::before, *::after {
+    visibility: visible !important;
+    color: black !important;
+    background: white !important;
+  }
+  
+  /* Prevent content clipping */
+  .editor-canvas > div {
+    height: auto !important;
+    min-height: auto !important;
+  }
+  
+  /* Ensure header and footer elements are visible */
+  .header-area, .footer-area {
+    display: block !important;
+    visibility: visible !important;
+    position: absolute !important;
+    z-index: 10 !important;
+    width: 100% !important;
+  }
+  
+  /* Specific header and footer styles for print */
+  .header-area {
     top: 0 !important;
     left: 0 !important;
+    right: 0 !important;
+    height: 64px !important;
+    padding: 16px 96px !important;
+    border-bottom: 1px solid #ddd !important;
+    background: white !important;
+  }
+  
+  .footer-area {
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 64px !important;
+    padding: 16px 96px !important;
+    border-top: 1px solid #ddd !important;
+    background: white !important;
+  }
+  
+  /* Ensure all pages are rendered */
+  .page-container {
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  /* Ensure all content is visible in print */
+  .ProseMirror {
+    visibility: visible !important;
+  }
+  
+  /* Make sure content fills the available space */
+  .editor-canvas {
+    visibility: visible !important;
+  }
+  
+  /* Ensure proper rendering of all elements */
+  .page-container {
+    -webkit-transform: none !important;
+    -moz-transform: none !important;
+    -ms-transform: none !important;
+    -o-transform: none !important;
+    transform: none !important;
   }
 }
 

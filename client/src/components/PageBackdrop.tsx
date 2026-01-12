@@ -18,7 +18,7 @@ export function PageBackdrop({ pageCount, headerContent, footerContent, showPage
           key={i}
           className={clsx(
             "page-container relative bg-white shadow-md border border-border/50 transition-all duration-300 ease-in-out",
-            "print:shadow-none print:border-none print:m-0"
+            "print:shadow-none print:border print:border-border/50 print:m-0"
           )}
           style={{
             width: "816px", // 8.5in
@@ -27,16 +27,24 @@ export function PageBackdrop({ pageCount, headerContent, footerContent, showPage
           }}
         >
           {/* Header Area */}
-          <div className="absolute top-8 left-12 right-12 h-12 border-b border-transparent group-hover:border-border/30 flex items-end justify-between text-xs text-muted-foreground/70">
-            <span>{headerContent}</span>
+          <div className="header-area absolute top-0 left-0 right-0 h-16 px-12 flex items-center justify-between text-sm text-gray-600 border-b border-gray-300 print:border-gray-300 print:z-50">
+            <div className="font-medium">{headerContent || "Header"}</div>
+            <div className="text-right text-xs space-y-1">
+              <div className="font-medium">Page {i + 1}</div>
+              <div className="text-gray-500">{new Date().toLocaleDateString()}</div>
+            </div>
           </div>
 
           {/* Footer Area */}
-          <div className="absolute bottom-8 left-12 right-12 h-12 border-t border-transparent group-hover:border-border/30 flex items-start justify-between text-xs text-muted-foreground/70 pt-2">
-            <span>{footerContent}</span>
-            {showPageNumbers && (
-              <span>Page {i + 1} of {pageCount}</span>
-            )}
+          <div className="footer-area absolute bottom-0 left-0 right-0 h-16 px-12 flex items-center justify-between text-sm text-gray-600 border-t border-gray-300 print:border-gray-300 print:z-50">
+            <div className="font-medium">{footerContent || "Footer"}</div>
+            <div className="text-right">
+              <div className="text-xs">
+                {showPageNumbers && (
+                  <span>Page {i + 1} of {pageCount}</span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       ))}
